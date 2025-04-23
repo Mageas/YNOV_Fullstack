@@ -2,12 +2,16 @@
 
 namespace App\Entity;
 
-use App\Repository\SongRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\SongRepository;
+use App\Traits\StatisticsPropertiesTrait;
 
+#[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: SongRepository::class)]
 class Song
 {
+    use StatisticsPropertiesTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

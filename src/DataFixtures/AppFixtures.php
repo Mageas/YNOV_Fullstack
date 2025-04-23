@@ -4,6 +4,7 @@ namespace App\DataFixtures;
 
 use Faker\Factory;
 use App\Entity\Song;
+use App\Enums\Status;
 use App\Faker\Provider\Goat;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -25,6 +26,7 @@ class AppFixtures extends Fixture
             $song = new Song();
             $song->setName($this->faker->goatName());
             $song->setArtiste("Muse");
+            $song->setStatus(Status::Active->value);
 
             $manager->persist($song);
         }
