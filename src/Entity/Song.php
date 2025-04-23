@@ -68,7 +68,7 @@ class Song
     /**
      * @return Collection<int, Pool>
      */
-    public function getPool(): Collection
+    public function getPools(): Collection
     {
         return $this->pools;
     }
