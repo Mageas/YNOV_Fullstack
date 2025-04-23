@@ -3,16 +3,18 @@
 namespace App\Controller;
 
 use App\Entity\Song;
+use App\Enums\Status;
 use App\Repository\SongRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Exception\JsonException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class SongController extends AbstractController
 {
@@ -58,13 +60,42 @@ final class SongController extends AbstractController
     }
 
     #[Route('api/v1/song/{id}', name: 'delete_song', methods: ['DELETE'])]
-    public function delete(Song $id, EntityManagerInterface $entityManager): JsonResponse
+    public function delete(Song $song, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
-        $entityManager->remove($id);
+        try {
+            $hardDelete = $request->toArray()['hardDelete'] ?? false === true;
+        } catch (JsonException) {
+            $hardDelete = false;
+        }
+
+        if ($hardDelete) {
+            $entityManager->remove($song);
+        } else {
+            $song->setStatus(Status::Inactive->value);
+            $entityManager->persist($song);
+        }
+
         $entityManager->flush();
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
+
+    // #[Route('api/v1/song/{id}', name: 'delete_song', methods: ['DELETE'])]
+    // public function delete(Song $song, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    // {
+    //     $hardDelete = $request->query->getBoolean('hardDelete', false);
+
+    //     if ($hardDelete) {
+    //         $entityManager->remove($song);
+    //     } else {
+    //         $song->setStatus(Status::Inactive->value);
+    //         $entityManager->persist($song);
+    //     }
+
+    //     $entityManager->flush();
+
+    //     return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    // }
 
     // #[Route('api/v1/song/{song}', name: 'get_song', methods: ['GET'])]
     // public function get(Song $song, SongRepository $songRepository, SerializerInterface $serializer): JsonResponse
