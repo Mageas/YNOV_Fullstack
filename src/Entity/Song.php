@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\SongRepository;
 use App\Traits\StatisticsPropertiesTrait;
@@ -22,6 +24,17 @@ class Song
 
     #[ORM\Column(length: 255)]
     private ?string $artiste = null;
+
+    /**
+     * @var Collection<int, Pool>
+     */
+    #[ORM\ManyToMany(targetEntity: Pool::class, inversedBy: 'songs')]
+    private Collection $pools;
+
+    public function __construct()
+    {
+        $this->pools = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -48,6 +61,30 @@ class Song
     public function setArtiste(string $artiste): static
     {
         $this->artiste = $artiste;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Pool>
+     */
+    public function getPool(): Collection
+    {
+        return $this->pools;
+    }
+
+    public function addPool(Pool $pool): static
+    {
+        if (!$this->pools->contains($pool)) {
+            $this->pools->add($pool);
+        }
+
+        return $this;
+    }
+
+    public function removePool(Pool $pool): static
+    {
+        $this->pools->removeElement($pool);
 
         return $this;
     }
