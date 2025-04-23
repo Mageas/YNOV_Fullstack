@@ -17,17 +17,25 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 #[Route('api/v2/song', name: 'api_v2_song_')]
 final class SongController extends AbstractController
 {
-    #[Route('', name: 'get_all', methods: ['GET'])]
-    public function getAll(SongRepository $songRepository, SerializerInterface $serializer): JsonResponse
-    {
-        $data = $songRepository->findAll();
-        $jsonData = $serializer->serialize($data, 'json', ['groups' => ['song', 'stats']]);
+    const TAG_NAME = 'songsCache';
 
-        return new JsonResponse($jsonData, Response::HTTP_OK, [], true);
+    #[Route('', name: 'get_all', methods: ['GET'])]
+    public function getAll(SongRepository $songRepository, SerializerInterface $serializer, TagAwareCacheInterface $cache): JsonResponse
+    {
+        $cacheReturn = $cache->get('getAllSongs', function (ItemInterface $item) use ($songRepository, $serializer) {
+            $item->tag(self::TAG_NAME);
+            $data = $songRepository->findAll();
+            $jsonData = $serializer->serialize($data, 'json', ['groups' => ['song', 'stats']]);
+            return $jsonData;
+        });
+
+        return new JsonResponse($cacheReturn, Response::HTTP_OK, [], true);
     }
 
     #[Route('/{id}', name: 'get', methods: ['GET'])]
@@ -63,7 +71,7 @@ final class SongController extends AbstractController
     }
 
     #[Route('/{id}', name: 'update', methods: ['PATCH'])]
-    public function update(Song $id, Request $request, PoolRepository $poolRepository, SerializerInterface $serializer, EntityManagerInterface $entityManager): JsonResponse
+    public function update(Song $id, Request $request, PoolRepository $poolRepository, SerializerInterface $serializer, EntityManagerInterface $entityManager, TagAwareCacheInterface $cache): JsonResponse
     {
         $song = $serializer->deserialize($request->getContent(), Song::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $id]);
 
@@ -75,6 +83,9 @@ final class SongController extends AbstractController
 
         $entityManager->persist($song);
         $entityManager->flush();
+
+        // TODO: Add cache for 'create' and 'delete'
+        $cache->invalidateTags([self::TAG_NAME]);
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
