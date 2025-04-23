@@ -2,11 +2,12 @@
 
 namespace App\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
 use App\Repository\PoolRepository;
 use App\Traits\StatisticsPropertiesTrait;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: PoolRepository::class)]
@@ -17,12 +18,15 @@ class Pool
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['song'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['song'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['song'])]
     private ?string $shortName = null;
 
     /**

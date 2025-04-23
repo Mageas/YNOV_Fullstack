@@ -23,7 +23,7 @@ final class SongController extends AbstractController
     public function getAll(SongRepository $songRepository, SerializerInterface $serializer): JsonResponse
     {
         $data = $songRepository->findAll();
-        $jsonData = $serializer->serialize($data, 'json');
+        $jsonData = $serializer->serialize($data, 'json', ['groups' => ['song', 'stats']]);
 
         return new JsonResponse($jsonData, Response::HTTP_OK, [], true);
     }
@@ -31,7 +31,7 @@ final class SongController extends AbstractController
     #[Route('/{id}', name: 'get', methods: ['GET'])]
     public function get(Song $id, SerializerInterface $serializer): JsonResponse
     {
-        $jsonData = $serializer->serialize($id, 'json');
+        $jsonData = $serializer->serialize($id, 'json', ['groups' => ['song', 'stats']]);
         return new JsonResponse($jsonData, Response::HTTP_OK, [], true);
     }
 
@@ -43,7 +43,7 @@ final class SongController extends AbstractController
         $entityManager->persist($song);
         $entityManager->flush();
 
-        $jsonData = $serializer->serialize($song, 'json');
+        $jsonData = $serializer->serialize($song, 'json', ['groups' => ['song', 'stats']]);
         $location = $urlGenerator->generate('api_v2_song_get', ['id' => $song->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
         return new JsonResponse($jsonData, Response::HTTP_CREATED, ['location' => $location], true);

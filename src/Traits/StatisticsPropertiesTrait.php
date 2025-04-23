@@ -2,23 +2,27 @@
 
 namespace App\Traits;
 
-use App\Enums\Status;
-use App\Exceptions\StatusNotFoundException;
 use DateTime;
+use Exception;
+use App\Enums\Status;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Exception;
+use App\Exceptions\StatusNotFoundException;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 trait StatisticsPropertiesTrait
 {
     #[ORM\Column]
+    #[Groups(['stats'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Groups(['stats'])]
     private ?\DateTimeInterface $updatedAt = null;
 
     #[ORM\Column(length: 10)]
+    #[Groups(['stats'])]
     private ?string $status = null;
 
     public function getCreatedAt(): ?\DateTimeImmutable

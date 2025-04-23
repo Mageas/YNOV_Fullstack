@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\SongRepository;
 use App\Traits\StatisticsPropertiesTrait;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: SongRepository::class)]
@@ -17,18 +18,22 @@ class Song
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['song'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['song'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['song'])]
     private ?string $artiste = null;
 
     /**
      * @var Collection<int, Pool>
      */
     #[ORM\ManyToMany(targetEntity: Pool::class, inversedBy: 'songs')]
+    #[Groups(['song'])]
     private Collection $pools;
 
     public function __construct()
