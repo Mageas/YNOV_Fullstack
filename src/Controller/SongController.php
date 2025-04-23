@@ -57,6 +57,15 @@ final class SongController extends AbstractController
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 
+    #[Route('api/v1/song/{id}', name: 'delete_song', methods: ['DELETE'])]
+    public function delete(Song $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $entityManager->remove($id);
+        $entityManager->flush();
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
+
     // #[Route('api/v1/song/{song}', name: 'get_song', methods: ['GET'])]
     // public function get(Song $song, SongRepository $songRepository, SerializerInterface $serializer): JsonResponse
     // {
