@@ -18,21 +18,22 @@ class Pool
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['song'])]
+    #[Groups(['song', 'pool'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['song'])]
+    #[Groups(['song', 'pool'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['song'])]
+    #[Groups(['song', 'pool'])]
     private ?string $shortName = null;
 
     /**
      * @var Collection<int, Song>
      */
     #[ORM\ManyToMany(targetEntity: Song::class, mappedBy: 'pools')]
+    #[Groups(['pool'])]
     private Collection $songs;
 
     public function __construct()

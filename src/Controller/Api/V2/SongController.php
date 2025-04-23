@@ -4,6 +4,7 @@ namespace App\Controller\Api\V2;
 
 use App\Entity\Song;
 use App\Enums\Status;
+use App\Repository\PoolRepository;
 use App\Repository\SongRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -36,9 +37,14 @@ final class SongController extends AbstractController
     }
 
     #[Route('', name: 'create', methods: ['POST'])]
-    public function create(Request $request, UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, EntityManagerInterface $entityManager): JsonResponse
+    public function create(Request $request, PoolRepository $poolRepository, UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, EntityManagerInterface $entityManager): JsonResponse
     {
         $song = $serializer->deserialize($request->getContent(), Song::class, 'json');
+
+        foreach ($request->toArray()['idPools'] as $idPool) {
+            $pool = $poolRepository->find($idPool);
+            $song->addPool($pool);
+        }
 
         $entityManager->persist($song);
         $entityManager->flush();
@@ -50,9 +56,15 @@ final class SongController extends AbstractController
     }
 
     #[Route('/{id}', name: 'update', methods: ['PATCH'])]
-    public function update(Song $id, Request $request, SerializerInterface $serializer, EntityManagerInterface $entityManager): JsonResponse
+    public function update(Song $id, Request $request, PoolRepository $poolRepository, SerializerInterface $serializer, EntityManagerInterface $entityManager): JsonResponse
     {
         $song = $serializer->deserialize($request->getContent(), Song::class, 'json', [AbstractNormalizer::OBJECT_TO_POPULATE => $id]);
+
+        $song->removePools();
+        foreach ($request->toArray()['idPools'] as $idPool) {
+            $pool = $poolRepository->find($idPool);
+            $song->addPool($pool);
+        }
 
         $entityManager->persist($song);
         $entityManager->flush();

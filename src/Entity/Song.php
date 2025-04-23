@@ -18,15 +18,15 @@ class Song
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['song'])]
+    #[Groups(['song', 'pool'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['song'])]
+    #[Groups(['song', 'pool'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['song'])]
+    #[Groups(['song', 'pool'])]
     private ?string $artiste = null;
 
     /**
@@ -90,6 +90,15 @@ class Song
     public function removePool(Pool $pool): static
     {
         $this->pools->removeElement($pool);
+
+        return $this;
+    }
+
+    public function removePools(): static
+    {
+        foreach ($this->getPools() as $pool) {
+            $this->removePool($pool);
+        }
 
         return $this;
     }
