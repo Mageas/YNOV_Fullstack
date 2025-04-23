@@ -16,6 +16,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+#[\Deprecated(message: "use the new version instead", since: "V2")]
 final class SongController extends AbstractController
 {
     #[Route('api/v1/song', name: 'get_all_song', methods: ['GET'])]
