@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Exception\JsonException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('api/v2/song', name: 'api_v2_song_')]
 final class SongController extends AbstractController
@@ -37,9 +38,15 @@ final class SongController extends AbstractController
     }
 
     #[Route('', name: 'create', methods: ['POST'])]
-    public function create(Request $request, PoolRepository $poolRepository, UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, EntityManagerInterface $entityManager): JsonResponse
+    public function create(Request $request, PoolRepository $poolRepository, UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse
     {
         $song = $serializer->deserialize($request->getContent(), Song::class, 'json');
+
+        $errors = $validator->validate($song);
+
+        if ($errors->count() > 0) {
+            return new JsonResponse($serializer->serialize($errors, 'json'), JsonResponse::HTTP_BAD_REQUEST, [], true);
+        }
 
         foreach ($request->toArray()['idPools'] as $idPool) {
             $pool = $poolRepository->find($idPool);

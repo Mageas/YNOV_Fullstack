@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\SongRepository;
 use App\Traits\StatisticsPropertiesTrait;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: SongRepository::class)]
@@ -23,10 +24,22 @@ class Song
 
     #[ORM\Column(length: 255)]
     #[Groups(['song', 'pool'])]
+    #[Assert\Length(
+        min: 3,
+        max: 30,
+        minMessage: 'Your first name must be at least {{ limit }} characters long',
+        maxMessage: 'Your first name cannot be longer than {{ limit }} characters',
+    )]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
     #[Groups(['song', 'pool'])]
+    #[Assert\Length(
+        min: 3,
+        max: 30,
+        minMessage: 'Your first name must be at least {{ limit }} characters long',
+        maxMessage: 'Your first name cannot be longer than {{ limit }} characters',
+    )]
     private ?string $artiste = null;
 
     /**
