@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
+use App\Repository\SongRepository;
+use App\Traits\StatisticsPropertiesTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\SongRepository;
-use App\Traits\StatisticsPropertiesTrait;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 

@@ -18,7 +18,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[Deprecated(message: 'use the new version instead', since: 'V2')]
-final class SongController extends AbstractController
+final class TestController extends AbstractController
 {
     #[Route('api/v1/song', name: 'get_all_song', methods: ['GET'])]
     public function getAll(SongRepository $songRepository, SerializerInterface $serializer): JsonResponse

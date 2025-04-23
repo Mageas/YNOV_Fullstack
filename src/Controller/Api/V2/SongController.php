@@ -7,15 +7,15 @@ use App\Enums\Status;
 use App\Repository\PoolRepository;
 use App\Repository\SongRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Exception\JsonException;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\HttpFoundation\Exception\JsonException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
@@ -23,7 +23,7 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 #[Route('api/v2/song', name: 'api_v2_song_')]
 final class SongController extends AbstractController
 {
-    const TAG_NAME = 'songsCache';
+    public const TAG_NAME = 'songsCache';
 
     #[Route('', name: 'get_all', methods: ['GET'])]
     public function getAll(SongRepository $songRepository, SerializerInterface $serializer, TagAwareCacheInterface $cache): JsonResponse
@@ -32,6 +32,7 @@ final class SongController extends AbstractController
             $item->tag(self::TAG_NAME);
             $data = $songRepository->findAll();
             $jsonData = $serializer->serialize($data, 'json', ['groups' => ['song', 'stats']]);
+
             return $jsonData;
         });
 
@@ -42,6 +43,7 @@ final class SongController extends AbstractController
     public function get(Song $id, SerializerInterface $serializer): JsonResponse
     {
         $jsonData = $serializer->serialize($id, 'json', ['groups' => ['song', 'stats']]);
+
         return new JsonResponse($jsonData, Response::HTTP_OK, [], true);
     }
 
@@ -110,5 +112,4 @@ final class SongController extends AbstractController
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
-
 }

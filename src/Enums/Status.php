@@ -9,6 +9,6 @@ enum Status: string
 
     public static function exists(string $value): bool
     {
-        return self::tryFrom($value) !== null;
+        return null !== self::tryFrom($value);
     }
 }

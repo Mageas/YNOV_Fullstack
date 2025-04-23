@@ -103,7 +103,7 @@ class Goat
         'Nymphe',
         'Sylphide',
         'Dryade',
-        'Gorgone'
+        'Gorgone',
     ];
 
     public static function goatName()
