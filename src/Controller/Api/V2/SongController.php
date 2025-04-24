@@ -6,6 +6,7 @@ use App\Entity\Song;
 use App\Enums\Status;
 use App\Repository\PoolRepository;
 use App\Repository\SongRepository;
+use App\Traits\HasVersionTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,20 +22,19 @@ use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 #[Route('api/v2/song', name: 'api_v2_song_')]
-final class SongController extends AbstractController
+class SongController extends AbstractController
 {
-    const API_VERSION = [
-        'version' => 'v2'
-    ];
-    const TAG_NAME = 'songsCache';
+    use HasVersionTrait;
+
+    protected const VERSION = 'v2';
 
     #[Route('', name: 'get_all', methods: ['GET'])]
     public function getAll(SongRepository $songRepository, SerializerInterface $serializer, TagAwareCacheInterface $cache): JsonResponse
     {
-        $cacheReturn = $cache->get('getAllSongs', function (ItemInterface $item) use ($songRepository, $serializer) {
-            $item->tag(self::TAG_NAME);
+        $cacheReturn = $cache->get('getAllSongs' . $this->getVersion(), function (ItemInterface $item) use ($songRepository, $serializer) {
+            $item->tag('songsCache' . $this->getVersion());
             $data = $songRepository->findAll();
-            $jsonData = $serializer->serialize($data, 'json', ['groups' => ['song', 'stats'], ...self::API_VERSION]);
+            $jsonData = $serializer->serialize($data, 'json', ['groups' => ['song', 'stats'], ...$this->getApiVersion()]);
             return $jsonData;
         });
 
@@ -44,7 +44,7 @@ final class SongController extends AbstractController
     #[Route('/{id}', name: 'get', methods: ['GET'])]
     public function get(Song $id, SerializerInterface $serializer): JsonResponse
     {
-        $jsonData = $serializer->serialize($id, 'json', ['groups' => ['song', 'stats'], ...self::API_VERSION]);
+        $jsonData = $serializer->serialize($id, 'json', ['groups' => ['song', 'stats'], ...$this->getApiVersion()]);
         return new JsonResponse($jsonData, Response::HTTP_OK, [], true);
     }
 
@@ -67,7 +67,7 @@ final class SongController extends AbstractController
         $entityManager->persist($song);
         $entityManager->flush();
 
-        $jsonData = $serializer->serialize($song, 'json', ['groups' => ['song', 'stats'], ...self::API_VERSION]);
+        $jsonData = $serializer->serialize($song, 'json', ['groups' => ['song', 'stats'], ...$this->getApiVersion()]);
         $location = $urlGenerator->generate('api_v2_song_get', ['id' => $song->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
         return new JsonResponse($jsonData, Response::HTTP_CREATED, ['location' => $location], true);
@@ -88,7 +88,7 @@ final class SongController extends AbstractController
         $entityManager->flush();
 
         // TODO: Add cache for 'create' and 'delete'
-        $cache->invalidateTags([self::TAG_NAME]);
+        $cache->invalidateTags(['songsCache' . $this->getVersion()]);
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
