@@ -4,22 +4,24 @@ namespace App\Controller\Api\V2;
 
 use App\Entity\Song;
 use App\Enums\Status;
+use OpenApi\Attributes as OA;
+use App\Traits\HasVersionTrait;
 use App\Repository\PoolRepository;
 use App\Repository\SongRepository;
-use App\Traits\HasVersionTrait;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Contracts\Cache\TagAwareCacheInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\Exception\JsonException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\Cache\ItemInterface;
-use Symfony\Contracts\Cache\TagAwareCacheInterface;
 
 #[Route('api/v2/song', name: 'api_v2_song_')]
 class SongController extends AbstractController
@@ -29,6 +31,14 @@ class SongController extends AbstractController
     protected const VERSION = 'v2';
 
     #[Route('', name: 'get_all', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Retrieve all songs',
+        content: new OA\JsonContent(
+            items: new OA\Items(new Model(type: Song::class, groups: ['song']))
+        )
+    )]
+    #[OA\Tag('Songs')]
     public function getAll(SongRepository $songRepository, SerializerInterface $serializer, TagAwareCacheInterface $cache): JsonResponse
     {
         $cacheReturn = $cache->get('getAllSongs' . $this->getVersion(), function (ItemInterface $item) use ($songRepository, $serializer) {
@@ -42,6 +52,17 @@ class SongController extends AbstractController
     }
 
     #[Route('/{id}', name: 'get', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Retrieve a song',
+        content: new OA\JsonContent(
+            items: new OA\Items(new Model(type: Song::class, groups: ['song']))
+        )
+    )]
+    #[OA\Parameter(
+        name: ''
+    )]
+    #[OA\Tag('Songs')]
     public function get(Song $id, SerializerInterface $serializer): JsonResponse
     {
         $jsonData = $serializer->serialize($id, 'json', ['groups' => ['song', 'stats'], ...$this->getApiVersion()]);
