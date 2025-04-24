@@ -23,6 +23,9 @@ use Symfony\Contracts\Cache\TagAwareCacheInterface;
 #[Route('api/v2/song', name: 'api_v2_song_')]
 final class SongController extends AbstractController
 {
+    const API_VERSION = [
+        'version' => 'v2'
+    ];
     const TAG_NAME = 'songsCache';
 
     #[Route('', name: 'get_all', methods: ['GET'])]
@@ -31,7 +34,7 @@ final class SongController extends AbstractController
         $cacheReturn = $cache->get('getAllSongs', function (ItemInterface $item) use ($songRepository, $serializer) {
             $item->tag(self::TAG_NAME);
             $data = $songRepository->findAll();
-            $jsonData = $serializer->serialize($data, 'json', ['groups' => ['song', 'stats']]);
+            $jsonData = $serializer->serialize($data, 'json', ['groups' => ['song', 'stats'], ...self::API_VERSION]);
             return $jsonData;
         });
 
@@ -41,7 +44,7 @@ final class SongController extends AbstractController
     #[Route('/{id}', name: 'get', methods: ['GET'])]
     public function get(Song $id, SerializerInterface $serializer): JsonResponse
     {
-        $jsonData = $serializer->serialize($id, 'json', ['groups' => ['song', 'stats']]);
+        $jsonData = $serializer->serialize($id, 'json', ['groups' => ['song', 'stats'], ...self::API_VERSION]);
         return new JsonResponse($jsonData, Response::HTTP_OK, [], true);
     }
 
@@ -64,7 +67,7 @@ final class SongController extends AbstractController
         $entityManager->persist($song);
         $entityManager->flush();
 
-        $jsonData = $serializer->serialize($song, 'json', ['groups' => ['song', 'stats']]);
+        $jsonData = $serializer->serialize($song, 'json', ['groups' => ['song', 'stats'], ...self::API_VERSION]);
         $location = $urlGenerator->generate('api_v2_song_get', ['id' => $song->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
         return new JsonResponse($jsonData, Response::HTTP_CREATED, ['location' => $location], true);
